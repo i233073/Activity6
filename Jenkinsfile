@@ -5,7 +5,7 @@ pipeline {
 
   parameters {
     string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch to build from')
-    string(name: 'STUDENT_NAME', defaultValue: 'your name')
+    string(name: 'STUDENT_NAME', defaultValue: 'Amna Shahzad', description: 'Your Name')
     choice(name: 'ENVIRONMENT', choices: ['dev','qa','prod'], description: 'Select environment')
     booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run Jest tests after build')
   }
@@ -22,24 +22,35 @@ pipeline {
         checkout scm
       }
     }
+
+    stage('Display Info') {
+      steps {
+        echo "=========================================="
+        echo " Running Jenkins Pipeline for: ${params.STUDENT_NAME}"
+        echo " Environment: ${params.ENVIRONMENT}"
+        echo "=========================================="
+      }
+    }
+
     stage('Install Dependencies') {
       steps {
         echo "Installing required packages..."
         bat 'npm install'
       }
     }
-   stage('Build') {
-  steps {
-    echo " Building version ${APP_VERSION} for ${params.ENVIRONMENT} environment"
-    bat '''
-    echo Simulating build process...
-    if not exist build mkdir build
-    copy src\\*.js build
-    echo Build completed successfully!
-    echo App version: %APP_VERSION% > build\\version.txt
-    '''
-  }
-}
+
+    stage('Build') {
+      steps {
+        echo " Building version ${APP_VERSION} for ${params.ENVIRONMENT} environment"
+        bat '''
+        echo Simulating build process...
+        if not exist build mkdir build
+        copy src\\*.js build
+        echo Build completed successfully!
+        echo App version: %APP_VERSION% > build\\version.txt
+        '''
+      }
+    }
 
     stage('Test') {
       when { expression { return params.RUN_TESTS } }
@@ -48,12 +59,14 @@ pipeline {
         bat 'npm test'
       }
     }
+
     stage('Package') {
       steps {
         echo "Creating zip archive for version ${APP_VERSION}"
         bat 'powershell Compress-Archive -Path build\\* -DestinationPath build_%APP_VERSION%.zip'
       }
     }
+
     stage('Deploy (Simulation)') {
       steps {
         echo "Simulating deployment of version ${APP_VERSION} to ${params.ENVIRONMENT}"
