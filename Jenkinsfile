@@ -28,18 +28,19 @@ pipeline {
         bat 'npm install'
       }
     }
-    stage('Build') {
-      steps {
-        echo " Building version ${APP_VERSION} for ${params.ENVIRONMENT} environment"
-        bat '''
-        echo Simulating build process...
-        if not exist build mkdir build
-        copy *.js build
-        echo Build completed successfully!
-        echo App version: %APP_VERSION% > build\\version.txt
-        '''
-      }
-    }
+   stage('Build') {
+  steps {
+    echo " Building version ${APP_VERSION} for ${params.ENVIRONMENT} environment"
+    bat '''
+    echo Simulating build process...
+    if not exist build mkdir build
+    copy src\\*.js build
+    echo Build completed successfully!
+    echo App version: %APP_VERSION% > build\\version.txt
+    '''
+  }
+}
+
     stage('Test') {
       when { expression { return params.RUN_TESTS } }
       steps {
